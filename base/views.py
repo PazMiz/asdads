@@ -308,19 +308,3 @@ class CustomTokenRefreshView(TokenRefreshView):
 
 
 
-# asgiref==3.7.2
-# cffi==1.15.1
-# cryptography==41.0.2
-# Django==4.2.2
-# django-cors-headers==4.0.0
-# django-rest-knox==4.2.0
-# djangorestframework==3.14.0
-# djangorestframework-simplejwt==5.2.2
-# mysqlclient==2.1.1
-# Pillow==10.0.0
-# pycparser==2.21
-# PyJWT==2.7.0
-# pytz==2023.3
-# sqlparse==0.4.4
-# typing_extensions==4.6.3
-knox==0.1.14
