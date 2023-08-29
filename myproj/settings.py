@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-1(vbs1widg&mrmosqt3*u^(ql(2ie8wdvl&2sn9py!5+5!6-!w
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['198.211.99.20', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['198.211.99.20', 'localhost', '127.0.0.1','https://django-testimage.onrender.com/']
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',  # Add the origin of your React frontend
