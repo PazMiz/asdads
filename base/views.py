@@ -323,3 +323,4 @@ class CustomTokenRefreshView(TokenRefreshView):
 # pytz==2023.3
 # sqlparse==0.4.4
 # typing_extensions==4.6.3
+knox==0.1.14
