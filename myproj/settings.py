@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-import environ
 from datetime import timedelta
 from pathlib import Path
 
@@ -21,21 +20,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-env = environ.Env()
-environ.Env.read_env()
+()
 
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = 'django-insecure-1(vbs1widg&mrmosqt3*u^(ql(2ie8wdvl&2sn9py!5+5!6-!w'
 
 # SECRET_KEY = 'django-insecure-*q)8m^2#s!&^(n$l)42@qz8azf3sson1j1xttn!irf!)ju&m5f'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('debug')
-EMAIL_HOST="smtp.gmail.com"
-EMAIL_HOST_USER="narnavg@gmail.com"
-EMAIL_HOST_PASSWORD='rzilwfaalkuufgke'
-EMAIL_PORT=587
-EMAIL_USE_TLS=True
-EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend"
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
