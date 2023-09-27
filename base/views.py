@@ -15,6 +15,9 @@ from django.urls import reverse_lazy
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 # from .models import BlacklistedToken
+    
+import secrets
+from rest_framework import status
 
 from .models import BlacklistedToken  # Import the BlacklistedToken model
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -27,6 +30,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from django.contrib.auth.models import User  # If you are using Django's built-in User model
+from PIL import Image  # For image processing
+from io import BytesIO  # For handling binary data in memory
+from django.core.files.base import ContentFile  # For working with files and content
+from rest_framework.decorators import api_view  # For defining API views
+from rest_framework.response import Response  # For sending API responses
+
+
 from django.contrib.auth.models import AbstractUser
 from rest_framework import viewsets
 from .serializers import TopicSerializer
@@ -35,6 +46,39 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Topic
 from .serializers import TopicSerializer
+
+from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView, PasswordResetDoneView
+from django.http import JsonResponse
+
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import AllowAny
+
+from rest_framework import generics
+from .models import FriendList
+from .serializers import FriendListSerializer
+
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from django.contrib.auth.models import User  # Import the User model
+from django.contrib.auth import authenticate
+
+from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework.response import Response
+
+
+from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework import status
+
+from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView, PasswordResetDoneView
+from django.http import JsonResponse
+
+# # # # # # # # # # # # # PCTopics # # # # # # # # # # # # # # # # 
 
 
 class TopicViewSet(viewsets.ModelViewSet):
@@ -89,7 +133,19 @@ class TopicDetailView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_404_NOT_FOUND)
 
+# # # # # # # # # # # # # PCTopics # # # # # # # # # # # # # # # # 
 
+#### Login ######## Login ######## Login ####
+
+
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.contrib.auth.models import User
+from .models import Profile  # Import the Profile model
+from django.core.files.base import ContentFile
+from PIL import Image
+from io import BytesIO
 
 @api_view(['POST'])
 def register(request):
@@ -107,8 +163,51 @@ def register(request):
         return Response({'error': 'Email already exists'}, status=400)
 
     user = User.objects.create_user(username=username, password=password, email=email)
+
+    # Handle the uploaded photo
+    if 'photo' in request.FILES:
+        photo = request.FILES['photo']
+        # Resize and save the photo to the user's profile
+        img = Image.open(photo)
+        img.thumbnail((200, 200))  # Resize the image to fit within 200x200 pixels
+        thumb_io = BytesIO()
+        img.save(thumb_io, 'JPEG', quality=85)
+        user.customuser.photo.save(photo.name, ContentFile(thumb_io.getvalue()))
+
     return Response({'message': 'User registered successfully'})
 
+from django.contrib.auth import authenticate, login
+from django.http import JsonResponse
+
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_view(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    
+    user = authenticate(username=username, password=password)
+    
+    if user is not None:
+        # Authentication successful
+        login(request, user)
+        
+        # You can generate and return an access token here if needed
+        # access_token = generate_access_token(user)
+        
+        # Return the username in the response
+        return JsonResponse({
+            'username': username,
+            'access': 'your_access_token_here',
+            'refresh': 'your_refresh_token_here'
+        })
+    else:
+        # Authentication failed
+        return JsonResponse({'error': 'Invalid credentials'}, status=401)
+
+    
+#### Login ####
 
 @csrf_exempt
 def upload_file(request):
@@ -155,8 +254,6 @@ def get_products(request):
     serializer = ProductSerializer(products, many=True)
     return JsonResponse(serializer.data, safe=False)
 
-from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView, PasswordResetDoneView
-from django.http import JsonResponse
 
 class CustomPasswordResetView(PasswordResetView):
     def form_valid(self, form):
@@ -219,44 +316,6 @@ class MyTokenObtainPairView(TokenObtainPairView):
     def __str__(self):
         return self.username
     
-    
-    
-
-    
-
-# from django.core.mail import send_mail
-
-# subject = 'Hello from Paz'
-# message = 'This is Paz. You forgot your password, please reset it!'
-# from_email = 'paz714239@gmail.com'  # Your email address
-# recipient_list = ['paz714239@gmail.com']  # Email address of the recipient
-
-# send_mail(subject, message, from_email, recipient_list)
-
-
-
-# @api_view(['POST'])
-# def login(request):
-#     username = request.data.get('username')
-#     password = request.data.get('password')
-
-#     try:
-#         user = User.objects.get(username=username)
-#     except User.DoesNotExist:
-#         return Response({'error': 'Invalid username'}, status=400)
-
-#     if not user.check_password(password):
-#         return Response({'error': 'Invalid password'}, status=400)
-
-#     # Login successful, generate and return access token and email
-#     access_token = generate_access_token(user)  # Generate access token using your preferred method
-#     email = user.email
-
-#     return Response({'access': access_token, 'email': email}, status=200)
-
-import secrets
-from rest_framework import status
-
 
 def login(request):
     if request.method == 'POST':
@@ -291,8 +350,7 @@ def generate_access_token(user):
     return token
 
 
-from rest_framework_simplejwt.views import TokenRefreshView
-from rest_framework.response import Response
+
 
 class CustomTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
@@ -303,8 +361,81 @@ class CustomTokenRefreshView(TokenRefreshView):
         return response
 
 
+######### Friends list #####
+
+class FriendListView(generics.ListCreateAPIView):
+    queryset = FriendList.objects.all()
+    serializer_class = FriendListSerializer
+
+class FriendDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = FriendList.objects.all()
+    serializer_class = FriendListSerializer
+
+class AddFriendView(generics.CreateAPIView):
+    queryset = FriendList.objects.all()
+    serializer_class = FriendListSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            # Assuming the request data includes the user and friend usernames
+            user = request.user  # Assuming you have authentication in place
+            friend_usernames = serializer.validated_data['friends']
+
+            # Retrieve the user's friend list
+            friend_list, created = FriendList.objects.get_or_create(user=user)
+
+            # Add friends to the friend list
+            for username in friend_usernames:
+                friend = User.objects.get(username=username)
+                friend_list.friends.add(friend)
+
+            return Response({'message': 'Friends added successfully'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+               ######  Friendlist END ###########
 
 
 
+###### XBOX  #######
 
+from rest_framework import generics
+from rest_framework import status
+from rest_framework.response import Response
+from .models import XboxTopic
+from .serializers import XboxTopicSerializer
 
+class XboxTopicViewSet(viewsets.ModelViewSet):
+    queryset = XboxTopic.objects.all()
+    serializer_class = XboxTopicSerializer
+    #permission_classes = [IsAuthenticated]
+
+class CreateXboxTopicView(generics.CreateAPIView):
+    queryset = XboxTopic.objects.all()
+    serializer_class = XboxTopicSerializer
+
+    def perform_create(self, serializer):
+        # Get the username from the request data
+        username = self.request.data.get('author')
+
+        # Get the user object based on the username
+        user = User.objects.get(username=username)
+
+        # Associate the user with the XboxTopic
+        serializer.save(author=user)
+
+class XboxTopicDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = XboxTopic.objects.all()
+    serializer_class = XboxTopicSerializer
+    
+    
+class DeleteXboxTopicView(generics.DestroyAPIView):
+    queryset = XboxTopic.objects.all()
+    serializer_class = XboxTopicSerializer
+
+    def perform_destroy(self, instance):
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+#### XBOX ####

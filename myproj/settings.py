@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 from datetime import timedelta
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,9 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 ()
 
-SECRET_KEY = 'django-insecure-1(vbs1widg&mrmosqt3*u^(ql(2ie8wdvl&2sn9py!5+5!6-!w'
+SECRET_KEY = config('SECRET_KEY')
 
-# SECRET_KEY = 'django-insecure-*q)8m^2#s!&^(n$l)42@qz8azf3sson1j1xttn!irf!)ju&m5f'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -104,13 +104,19 @@ SIMPLE_JWT = {
 
 
 
-    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
-    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=7),
+    'SLIDING_TOKEN_REFRESH_LIFETIME_GRACE_PERIOD': timedelta(days=2),
+    'SLIDING_TOKEN_REFRESH_SYNC_ON_LOGIN': True,
+
 }
 
 
 ROOT_URLCONF = 'myproj.urls'
+
+
+
 
 TEMPLATES = [
     {
@@ -123,6 +129,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # ... other context processors ...
             ],
         },
     },
